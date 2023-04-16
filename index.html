@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="./css.css" />
+  </head>
+  <body>
+    <div class="header">
+      <div class="weather_now">
+        <a href="#">
+          <span class="city">武汉：</span>
+          <img src="" class="weatherImg" />
+          <span class="temp"></span>
+          <span class="text"></span>
+          <span class="feelsLike"></span>
+        </a>
+        <div class="show_weather">
+          <div class="everyday_weather">
+            <div class="everyday_item"></div>
+            <div class="everyday_item"></div>
+            <div class="everyday_item"></div>
+            <div class="everyday_item"></div>
+            <div class="everyday_item"></div>
+            <div class="everyday_item"></div>
+            <div class="everyday_item"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      $(function () {
+        $(".weather_now").mouseenter(function () {
+          $(".show_weather").stop().fadeIn();
+          getForecastWeather(
+            "https://devapi.qweather.com/v7/weather/7d?location=101200101&key=db1d8918ac4143d595b1c9487b3ff776"
+          );
+        });
+        $(".weather_now").mouseleave(function () {
+          $(".show_weather").stop().fadeOut();
+        });
+        //获取未来七天的天气
+        function getForecastWeather(url) {
+          //发生ajax请求未来七天的天气
+          $.ajax({
+            url: url,
+            method: "get",
+            success: function (res) {
+              //console.log(res.daily);
+              var daily = res.daily;
+              //console.log(daily);
+              var status = res.code;
+              //console.log(status);
+              if (status == "200") {
+                $(".everyday_item").each(function (e) {
+                  var iconDay = daily[e].iconDay;
+                  var tempMax = daily[e].tempMax;
+                  var tempMin = daily[e].tempMin;
+                  var text = daily[e].textDay;
+                  var windDirDay = daily[e].windDirDay;
+                  var fxDate=daily[e].fxDate
+                  $(this).empty();
+                  $(this).append(`
+                <p class="everyday_title">${fxDate}</p>
+            <img src="./images/${iconDay}.svg" class="everyday_icon" />
+            <p class="everyday_tmp">${tempMax}~${tempMin}</p>
+            <p class="everyday_cond_txt">${text}</p>
+            <p class="everyday_cond_wind">${windDirDay}</p>
+                `);
+                });
+              }
+            },
+            error: function (err) {
+              console.log(err);
+            },
+          });
+        }
+
+        //获取现在的天气
+        function getNowWeather(url) {
+          //发送ajax到和风天气服务器获取数据
+          $.ajax({
+            url: url,
+            method: "get",
+            success: function (res) {
+              var status = res.code;
+              //console.log(res);
+              //console.log(res.now);
+              if (status == "200") {
+                //获取到now对象
+                var now = res.now;
+                //console.log(now);
+                //实况天气图标码
+                var code = now.icon;
+                //console.log(code);
+                //获取天气状态
+                var text = now.text;
+                //console.log(text);
+                //获取当前温度
+                var temp = now.temp;
+                //console.log(temp);
+                //获取体感温度
+                var feelsLike = now.feelsLike;
+                //console.log(feelsLike);
+
+                $(".weatherImg").attr("src", `./images/${code}.svg`);
+                $(".temp").html(temp + "℃");
+                $(".text").html(text);
+                $(".feelsLike").html(feelsLike);
+              }
+            },
+            error: function (err) {
+              console.log(err);
+            },
+          });
+        }
+        getNowWeather(
+          "https://devapi.qweather.com/v7/weather/now?location=101200101&key=db1d8918ac4143d595b1c9487b3ff776"
+        );
+      });
+    </script>
+  </body>
+</html>
